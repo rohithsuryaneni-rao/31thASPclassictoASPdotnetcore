@@ -1,18 +1,27 @@
 import React, { useState } from 'react';
 import GithubInput from './components/GithubInput';
 import Result from './components/Result';
-import { migrateCode } from './services/api';
 
 function App() {
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const handleStartMigration = async (repoUrl) => {
+    const onStartMigration = async (repoUrl) => {
         setLoading(true);
         setError(null);
         try {
-            const data = await migrateCode(repoUrl);
+            const response = await fetch('/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ repo_url: repoUrl })
+            });
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error);
+            }
             setResult(data);
         } catch (err) {
             setError(err.message);
@@ -23,7 +32,7 @@ function App() {
 
     return (
         <div className="container mx-auto p-4 pt-6 md:p-6 lg:p-12 xl:p-24">
-            <GithubInput onStartMigration={handleStartMigration} />
+            <GithubInput onStartMigration={onStartMigration} />
             <Result result={result} loading={loading} error={error} />
         </div>
     );
