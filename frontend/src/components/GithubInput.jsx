@@ -42,34 +42,34 @@ const GithubInput = ({ onStartMigration }) => {
   };
 
   return (
-    <div className="flex-1 p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold text-center mb-6 text-gray-600">
+    <div className="flex-1 p-8 bg-white rounded-lg shadow-xl max-w-md max-w-lg mx-auto">
+      <h3 className="text-2xl font-semibold text-center mb-8 text-gray-700">
         ASP Classic to ASP.NET Core Migration
-      </h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
+      </h3>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-3">
           <textarea
             placeholder="Enter GitHub repository URL (e.g., https://github.com/username/repository)"
             value={url}
             onChange={(e) => {
               setUrl(e.target.value);
-              setError(""); // Clear error when input changes
+              setError(""); 
             }}
-            rows="2"
-            className={`w-full p-4 border rounded-lg text-sm ${
+            rows="3"
+            className={`w-full p-4 border rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-${error ? 'red-500' : 'teal-500'} transition duration-200 ease-in-out ${
               error ? "border-red-500" : "border-gray-300"
             }`}
             required
           />
           {error && (
-            <p className="text-red-500 text-sm mt-1">
-              Error: Failed to migrate the repository. Please check the URL and try again.
+            <p className="text-red-500 text-sm mt-2">
+              Error: {error}
             </p>
           )}
         </div>
         <button
           type="submit"
-          className="w-full py-2 px-4 text-white font-semibold rounded-lg bg-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
+          className="w-full py-3 px-6 text-white font-semibold rounded-lg bg-[#2e8b86] hover:bg-[#248d7c] hover:text-black transition-colors duration-300 ease-in-out shadow-md"
         >
           Start Migration
         </button>
