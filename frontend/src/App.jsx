@@ -25,6 +25,7 @@ function App() {
         <div className="container mx-auto p-4 pt-6 md:p-6 lg:p-12 xl:p-24">
             <GithubInput onStartMigration={handleStartMigration} />
             <Result result={result} loading={loading} error={error} />
+           
         </div>
     );
 }
