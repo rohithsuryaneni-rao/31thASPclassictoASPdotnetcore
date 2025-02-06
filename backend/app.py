@@ -254,7 +254,7 @@ def create_appsettings_file(output_folder: Path):
     appsettings_content = """
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=SampleDb;User Id=sa;Password=your_password;"
+    "DefaultConnection": "Server=localhost;Database=SampleDb;Trusted_Connection=True;"
   },
   "Logging": {
     "LogLevel": {
