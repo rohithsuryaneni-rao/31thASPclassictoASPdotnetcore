@@ -246,16 +246,32 @@ def get_default_branch(owner, repo):
         raise Exception(f"Failed to fetch repository info: {str(e)}")
    
  
-def create_appsettings_file(output_folder):
-    """Create the appsettings.json file with default connection string"""
+from pathlib import Path
+
+def create_appsettings_file(output_folder: Path):
+    """Create the appsettings.json file with default connection string for .NET 8"""
+    
     appsettings_content = """
 {
   "ConnectionStrings": {
     "DefaultConnection": "Server=localhost;Database=SampleDb;User Id=sa;Password=your_password;"
-  }
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*"
 }
 """
-    (output_folder / "appsettings.json").write_text(appsettings_content.strip(), encoding='utf-8')    
+    # Ensure the directory exists before writing
+    output_folder.mkdir(parents=True, exist_ok=True)
+    
+    # Write the content to the appsettings.json file
+    (output_folder / "appsettings.json").write_text(appsettings_content.strip(), encoding='utf-8')
+
  
 def download_file(url, output_path):
     """Download a file and save it to the output folder"""
