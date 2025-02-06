@@ -49,14 +49,14 @@ const GithubInput = ({ onStartMigration }) => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-3">
           <textarea
-            placeholder="Enter GitHub repository URL (e.g., https://github.com/username/repository)"
+            placeholder="Enter GitHub repository URL (e.g., https://github.com/username/repository-name)"
             value={url}
             onChange={(e) => {
               setUrl(e.target.value);
               setError(""); 
             }}
             rows="3"
-            className={`w-full p-4 border rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-${error ? 'red-500' : 'teal-500'} transition duration-200 ease-in-out ${
+            className={`w-full p-4 border rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 ease-in-out ${
               error ? "border-red-500" : "border-gray-300"
             }`}
             required
