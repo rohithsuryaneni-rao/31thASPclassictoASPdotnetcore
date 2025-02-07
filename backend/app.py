@@ -271,7 +271,7 @@ def create_appsettings_file(output_folder: Path):
     
     # Write the content to the appsettings.json file
     (output_folder / "appsettings.json").write_text(appsettings_content.strip(), encoding='utf-8')
-
+  
  
 def download_file(url, output_path):
     """Download a file and save it to the output folder"""
@@ -317,14 +317,15 @@ def fetch_github_repo_contents(owner, repo, path="", branch="main"):
     except Exception as e:
         raise Exception(f"Failed to fetch repository contents: {str(e)}")
  
-def process_file(file, output_folder, converted_files, memory):
+def process_file(file, output_folder, converted_files, memory, project_name):
     """Process a single file for conversion"""
     try:
         content = fetch_file_content(file['download_url'])
         file_type = determine_file_type(content, file['name'])
        
-        converted_content = convert_file(content, file_type, memory)  # Pass memory to convert_file
-       
+        # Pass project_name to convert_file
+        converted_content = convert_file(content, file_type, memory, project_name)  # Updated line
+        
         output_path = determine_output_path(file, file_type, output_folder)
        
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -340,6 +341,7 @@ def process_file(file, output_folder, converted_files, memory):
        
     except Exception as e:
         converted_files[file['path']] = f"Error: {str(e)}"
+
  
 def determine_file_type(content, filename):
     """Determine the type of file based on content and filename"""
@@ -442,7 +444,7 @@ EndGlobal
     (output_folder / f"{project_name}.sln").write_text(sln_content)
  
 def create_program_cs_file(output_folder, project_name):
-    """Create Program.cs file with Swagger integration and middleware configuration"""
+    """Create Program.cs file with Swagger integration, middleware configuration, and AppDbContext injection"""
 
     program_cs_content = f"""
 using Microsoft.AspNetCore.Builder;
@@ -450,6 +452,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
+using {project_name}.Data; // Assuming AppDbContext is in the Data namespace
 
 namespace {project_name}
 {{
@@ -469,6 +473,10 @@ namespace {project_name}
                         // Add services to the container.
                         services.AddControllersWithViews();
                         services.AddSwaggerGen(); // Add Swagger generation
+                        
+                        // Register AppDbContext with dependency injection
+                        services.AddDbContext<AppDbContext>(options =>
+                            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))); // Adjust connection string as needed
                     }})
                     .Configure(app =>
                     {{
@@ -508,7 +516,10 @@ from langchain.memory import ConversationBufferMemory
 # memory = ConversationBufferMemory(return_messages=True)  # Add parameters if required
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-def convert_file(content, file_type, memory):
+
+    
+def convert_file(content, file_type, memory, project_name):
+    
     type_prompts = {
         "controller": "Generate the ASP.NET Core Web API controller code only. Do not include any models, DbContext, or configuration details. Just the controller implementation for handling the data. Do not include any language name or markdown code blocks in the output. Use the namespace {namespace}.",
         "model": "Convert the following code to a C# model class, ensuring it uses appropriate data types, properties with validation annotations (if necessary), and follows C# conventions for property and class design: Do not include any language name or markdown code blocks in the output. Use the namespace {namespace}.",
@@ -522,9 +533,10 @@ def convert_file(content, file_type, memory):
         "sql": "Convert the following SQL query to a more optimized version, considering indexing, query execution efficiency, and proper use of joins, filters, and database functions. Ensure that the query performs well on large datasets and follows best practices for database optimization:",
         "typescript": "Convert the following JavaScript code to TypeScript, ensuring that types are properly declared, interfaces and types are used where applicable, and the code takes full advantage of TypeScript’s features such as type safety, modules, and advanced ES6+ syntax:"
     }
- 
-    prompt = type_prompts.get(file_type, "Convert code:") + f"\n\n{content}"
- 
+
+    # Replace the {namespace} with the project_name
+    prompt = type_prompts.get(file_type, "Convert code:").replace("{namespace}", project_name) + f"\n\n{content}"
+    
     # Load previous context from memory
     chat_history = memory.load_memory_variables({}).get("chat_history", [])
     messages = [{"role": "system", "content": "You are a code migration specialist."}]
@@ -567,7 +579,6 @@ def convert_file(content, file_type, memory):
     except Exception as e:
         raise Exception(f"Conversion failed: {str(e)}")
  
-import json
  
 def create_launch_settings(project_name, output_folder):
     """Generate launchSettings.json in the Properties folder of the project."""
@@ -688,7 +699,8 @@ def convert_repo():
                             file,
                             output_folder,
                             converted_files,
-                            memory
+                            memory,
+                            project_name
                         )
                     )
                 elif file_ext in ['.mdb', '.accdb']:
@@ -754,3 +766,4 @@ def download_project(project_name):
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+    
